@@ -1,0 +1,34 @@
+public function getInfoWeather(){
+	$this->autoRender = false;
+	$content =  file_get_contents("http://api.openweathermap.org/data/2.5/group?id=1580578,1581129,1581297,1581188,1587923&units=metric&appid=91b7466cc755db1a94caf6d86a9c788a");
+	$weatherInfo = json_decode($content,true)["list"];
+
+	$data = [];
+	foreach($weatherInfo as $item){
+		$temp = [];
+		$cityId = isset($item["id"]) ? $item["id"] : "";
+		$cityName = isset($item["name"]) ? $item["name"] : "";
+		$weatherMain = isset($item["weather"][0]["main"]) ? $item["weather"][0]["main"] : "";
+		$weatherDescription = isset($item["weather"][0]["description"]) ? $item["weather"][0]["description"] : "";
+		$icon = isset($item["weather"][0]["icon"]) ? $item["weather"][0]["icon"] : "";
+		$weatherIcon = "";
+		if($icon){
+			$weatherIcon = "http://openweathermap.org/img/wn/".$icon."@2x.png";
+		}
+		$mainTemp = isset($item["main"]["temp"]) ? $item["main"]["temp"] : "";
+		$mainHumidity = isset($item["main"]["humidity"]) ? $item["main"]["humidity"] : "";
+		$temp = [
+			"cityId" => $cityId,
+			"cityName" => $cityName,
+			"weatherMain" => $weatherMain,
+			"weatherDescription" => $weatherDescription,
+			"weatherIcon" => $weatherIcon,
+			"mainTemp" => "$mainTemp",
+			"mainHumidity" => "$mainHumidity",
+		];
+		$data[] = $temp;
+	}
+	$msg = 'Current weather information of cities';
+	$statusCode = 200;
+	return $this->response->body(json_encode(array("data" => $data, "message" => $msg, 'statusCode' => $statusCode)));
+}

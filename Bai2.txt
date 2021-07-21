@@ -1,0 +1,32 @@
+public function login(){
+	$this->autoRender = false;
+	$this->request->onlyAllow('post');
+	$this->response->type('json');
+	$params = $this->request->data;
+
+	$username = isset($params['username']) ? $params['username'] : 'ngatp.16@gmail.com';
+	$password = isset($params['password']) ? $params['password'] : 'test0123';
+
+	$storedHash = $password;
+	$newHash = Security::hash($password, 'blowfish', $storedHash);
+	$correct = strcmp($storedHash, $newHash) == 0;
+
+	$conditions["OR"] = [
+		"User.UserEmail" => $username,
+		"User.UserPhone" => $username,
+	];
+	$user = $this->Users->find("all", [
+		"conditions" => $conditions
+	]);
+	if($user && $correct){
+		return json_encode([
+			"success" => true,
+			"data" => $user
+		]);
+	}else{
+		return json_encode([
+			"success" => false,
+			"message" => __("Unauthorised")
+		]);
+	}
+}
